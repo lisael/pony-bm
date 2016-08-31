@@ -35,10 +35,10 @@ primitive _LongestCommonSuffix
 
 class _StringFinderIterator is Iterator[ISize]
   let _finder: StringFinder val
-  let _text: String val
+  let _text: String box
   var _next: ISize = -1
 
-  new create(text: String val, finder: StringFinder val) =>
+  new create(text: String box, finder: StringFinder val) =>
     _finder = finder
     _text = text
 
@@ -151,7 +151,7 @@ class val StringFinder
       idx = idx + 1
     end
 
-  fun val find(text: String, start_pos: USize = 0): ISize=>
+  fun val find(text: String box, start_pos: USize = 0): ISize=>
     """
     return the index of the first occurence of the pattern starting at
     ``start_pos``. -1 if not found.
