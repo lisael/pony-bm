@@ -4,19 +4,19 @@ Boyer-Moore string search implementation.
 Ported from [search.go](https://golang.org/src/strings/search.go). Most
 of the documentation and comments are verbatim copy from go code.
 """
-use "debug"
 
-actor Main is FinderNotifier
+actor Main
   let _env: Env
 
   new create(env: Env) =>
     _env = env
-    let f = StringFinder("ssssG")
+    let f = StringFinder("CG")
     let text = "CGCGTCGAATGGACTAGTACAGTACAGATCTGGACTCT"
-    f.for_each(text, this)
-
-  be apply(pos: ISize) =>
-    _env.out.write(pos.string() + "\n")
+    let res = f.find(text)
+    env.out.write(res.string() + "\n")
+    for result in f.find_all(text) do
+      env.out.write(result.string() + "\n")
+    end
 
 
 primitive _LongestCommonSuffix
@@ -32,10 +32,24 @@ primitive _LongestCommonSuffix
     end
     idx
 
-trait FinderNotifier
-  be apply(pos: ISize)
 
-actor StringFinder
+class _StringFinderIterator is Iterator[ISize]
+  let _finder: StringFinder val
+  let _text: String val
+  var _next: ISize = -1
+
+  new create(text: String val, finder: StringFinder val) =>
+    _finder = finder
+    _text = text
+
+  fun ref has_next(): Bool =>
+    _next = _finder.find(_text, (_next + 1).usize())
+    if _next == -1 then false else true end
+
+  fun next(): ISize => _next
+
+
+class val StringFinder
   """
   StringFinder efficiently finds strings in a source text. It's implemented
   using the Boyer-Moore string search algorithm:
@@ -44,20 +58,16 @@ actor StringFinder
   document uses 1-based indexing)
 
   ```pony
-  actor Main is StringFinderNotifier
-    let _env: Env
-
+  actor Main
     new create(env: Env) =>
       _env = env
       let f = StringFinder("CG")
       let text = "CGCGTCGAATGGACTAGTACAGTACAGATCTGGACTCT"
-      f.next(text,this)  // prints 0
-      f.next(text,this,3)  // prints 5
-      f.for_each(text, this) // prints 0,2,5
-      f.for_each(text, this, 1) // prints 2,5
-
-    be apply(pos: ISize) =>
-      _env.out.write(pos.string() + "\n")
+      env.out.write(f.find(text).string() + "\n") // prints 0
+      env.out.write(f.find(text, 1).string() + "\n") // prints 2
+      for result in f.find_all(text) do
+        env.out.write(result.string() + "\n") prints 0,2,5
+      end
   ```
 
   """
@@ -95,7 +105,7 @@ actor StringFinder
 	// goodSuffixSkip[3] == shift+len(suffix) == 6+5 == 11.
   let _goodSuffixSkip: Array[USize]
 
-  new create(pattern': String) =>
+  new val create(pattern': String) =>
     pattern = pattern'  
     _size = pattern.size()
 
@@ -141,7 +151,7 @@ actor StringFinder
       idx = idx + 1
     end
 
-  be next(text: String, notifier: FinderNotifier tag, start_pos: USize = 0) =>
+  fun val find(text: String, start_pos: USize = 0): ISize=>
     """
     return the index of the first occurence of the pattern starting at
     ``start_pos``. -1 if not found.
@@ -152,33 +162,14 @@ actor StringFinder
       var jdx= (_size - 1).usize()
       while try (jdx >= 0) and (text(idx) == pattern(jdx)) else false end do
         if jdx == 0 then
-          notifier(idx.isize())
-          return
+          return idx.isize()
         end
         idx = idx - 1
         jdx = jdx - 1
       end
       idx  = idx + try _badCharSkip(text(idx).usize()).max(_goodSuffixSkip(jdx)) else 1 end
     end 
-    notifier(-1)
+    -1
 
-  be for_each(text: String, notifier: FinderNotifier tag, start_pos: USize=0) =>
-    let mf = MultipleFinder(this, text, notifier)
-    next(text, mf, start_pos)
-
-
-actor MultipleFinder is FinderNotifier
-  let _notify: FinderNotifier tag
-  let _text: String
-  let _finder: StringFinder tag
-
-  new create(finder: StringFinder, text: String, notifier: FinderNotifier tag) =>
-    _notify = notifier
-    _finder = finder
-    _text = text
-
-  be apply(pos: ISize) =>
-    if pos != -1 then
-      _notify(pos)
-      _finder.next(_text, this, (pos + 1).usize())
-    end
+  fun val find_all(text: String): _StringFinderIterator =>
+    _StringFinderIterator(text, this)
