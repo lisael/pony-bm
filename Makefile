@@ -10,6 +10,7 @@ TEST_SRC=$(PKG)/test
 TEST_BIN=$(BUILD_DIR)/test
 BENCH_SRC=$(PKG)/bench
 BENCH_BIN=$(BUILD_DIR)/bench
+prefix=/usr/local
 
 all: $(BIN_DIR) test $(BIN) ## Run tests and build the package
 
@@ -18,6 +19,12 @@ run: $(BIN) ## Build and run the package
 
 debug: $(DEBUG) ## Build a and run the package with --debug
 	$(DEBUG)
+
+install: ## Install binary in $(prefix). Default prefix=/usr/local
+	cp $(BIN) $(prefix)/bin
+
+uninstall: ## Remove binary from prefix.
+	rm $(prefix)/bin/$(PKG)
 
 test: $(TEST_BIN) runtest ## Build and run tests
 
@@ -59,5 +66,11 @@ clean: ## Remove all artifacts
 .PHONY: help
 
 help: ## Show help
-		@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
-
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@echo
+	@echo "Install instructions:"
+	@echo "  make"
+	@echo "  sudo make install"
+	@echo "or, for your user only (assuming ~/bin is in your PATH)"
+	@echo "  make"
+	@echo "  make install prefix=$$HOME"
