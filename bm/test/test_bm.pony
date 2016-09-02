@@ -33,14 +33,14 @@ class iso _TestFind is UnitTest
     let f' = StringFinder("not here")
     h.assert_eq[ISize](f'.find(haystack), -1)
     // nothing bad happen if the needle is larger than the haystack
-    idx = f.find("a", 2)
+    idx = f.find("a")
     h.assert_eq[ISize](idx, -1)
 
 
 class iso _TestFindAll is UnitTest
   let needle: String = "CG"
   let haystack: String = "aCGtCGagtc"
-                        //0123456789
+                       // 0123456789
 
   fun name():String => "FindAll"
 
@@ -54,6 +54,7 @@ class iso _TestFindAll is UnitTest
     h.assert_eq[Bool](fa.has_next(), false)
     // findall should not overlap by default
     let hs = "aaaa"
+           // 0123
     let f' = StringFinder("aa")
     let fa' = f'.find_all(hs)
     fa'.has_next()

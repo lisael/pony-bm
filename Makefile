@@ -2,13 +2,22 @@ PKG=bm
 BUILD_DIR=build
 PONYC=ponyc
 PONY_SRC=$(wildcard **/*.pony) $(wildcard **/**/*.pony) $(wildcard **/**/**/*.pony)
-BIN=$(BUILD_DIR)/$(PKG)
+BIN_DIR=$(BUILD_DIR)/release
+BIN=$(BIN_DIR)/$(PKG)
+DEBUG_DIR=$(BUILD_DIR)/debug
+DEBUG=$(DEBUG_DIR)/$(PKG)
 TEST_SRC=$(PKG)/test
 TEST_BIN=$(BUILD_DIR)/test
 BENCH_SRC=$(PKG)/bench
 BENCH_BIN=$(BUILD_DIR)/bench
 
-all: $(BUILD_DIR) test $(BIN) ## Run tests and build the package
+all: $(BIN_DIR) test $(BIN) ## Run tests and build the package
+
+run: $(BIN) ## Build and run the package
+	$(BIN)
+
+debug: $(DEBUG) ## Build a and run the package with --debug
+	$(DEBUG)
 
 test: $(TEST_BIN) runtest ## Build and run tests
 
@@ -29,8 +38,17 @@ runbench: ## Run benchmarks
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
+
 $(BIN): $(PONY_SRC) 
-	$(PONYC) -o $(BUILD_DIR) $(PKG)
+	$(PONYC) -o $(BIN_DIR) $(PKG)
+
+$(DEBUG_DIR):
+	mkdir -p $(DEBUG_DIR)
+
+$(DEBUG): $(PONY_SRC) 
+	$(PONYC) --debug -o $(DEBUG_DIR) $(PKG)
 
 doc: $(PONY_SRC) ## Build the documentation 
 	$(PONYC) -o $(BUILD_DIR) --docs --path . --pass=docs $(PKG)
