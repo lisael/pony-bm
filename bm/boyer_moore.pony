@@ -154,7 +154,7 @@ class val StringFinder
       idx = idx + 1
     end
 
-  fun val find(text: String box, start_pos: USize = 0): ISize=>
+  fun box find(text: String box, start_pos: USize = 0): ISize=>
     """
     return the index of the first occurence of the pattern starting at
     ``start_pos``. -1 if not found.
@@ -173,6 +173,23 @@ class val StringFinder
       idx  = idx + try _badCharSkip(text(idx).usize()).max(_goodSuffixSkip(jdx)) else 1 end
     end 
     -1
+
+  fun box contains(src: String, offset: USize=0): Bool =>
+    find(src, offset) != -1
+
+  fun at(src: String, offset: ISize=0): Bool =>
+    // yes it's cheating, but i'm pretty sure I can't be faster than
+    src.at(pattern, offset)
+
+  fun box count(src: String): USize =>
+    var cnt: USize = 0
+    var sz = _size.usize()
+    var next = - sz
+    while true do
+      next = find(src, (next + sz)).usize()
+      if next == -1 then break else cnt = cnt + 1 end
+    end
+    cnt
 
   fun val find_all(text: String, overlap: Bool=false): StringFinderIterator =>
     StringFinderIterator(text, this, if overlap then 1 else (_size).isize()end)
