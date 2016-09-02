@@ -1,9 +1,10 @@
 use "ponybench"
 use "bm"
 // Currently (Aug 31) there's a segfault in the builtin `no match` bench
-// The error doesn't show with ponyc -d :/ so I couldn't narrow the LoC in
-// ponybench. The segfault probably comes from builtin. I'm currently
-// trying to reproduce with a simpler code (w/o ponybench)
+// The error doesn't show with ponyc -d :/
+// The bug is in llvm, compile ponyc with
+// make LLVM_CONFIG=llvm-config-3.6 LLVM_LINK=llvm-link-3.6 LLVM_OPT=opt-3.6
+// sudo make install
 
 class BuiltinFinder
   let _n: String
@@ -34,7 +35,7 @@ actor Main
     var long_haystack = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
     "aaaaaaaaaaaaaaaaaaaab"
-    // compare(needle, long_haystack, "long")
+    compare(needle, long_haystack, "long")
 
     // no match
     needle = "ccc"
@@ -43,14 +44,14 @@ actor Main
 
     // strcmp best cases
     needle = "b"
-    //compare(needle, long_haystack, "2")
+    compare(needle, long_haystack, "one letter")
 
     needle = "aaaaaaaaaaaaaaa"
     haystack = "aaaaaaaaaaaaaaaaaab"
-    //compare(needle, haystack, "3")
+    compare(needle, haystack, "long needle")
 
   fun compare(needle: String, haystack: String, group: String) =>
     // benchmark Fib with different inputs
     bench[ISize](group + ": builtin", BuiltinFinder(needle, haystack))
-    //bench[ISize](group + ": boyer-moore", Finder(needle, haystack))
+    bench[ISize](group + ": boyer-moore", Finder(needle, haystack))
 
