@@ -17,7 +17,7 @@ actor Main
     env.out.write(f.find(text).string() + "\n") // prints 0
     env.out.write(f.find(text, 1).string() + "\n") // prints 2
     for result in f.find_all(text) do
-      env.out.write(result.string() + "\n") prints 0,2,5
+      env.out.write(result.string() + "\n") // prints 0,2,5
     end
 ```
 

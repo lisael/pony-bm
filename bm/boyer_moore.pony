@@ -4,21 +4,6 @@ Boyer-Moore string search implementation.
 Ported from [search.go](https://golang.org/src/strings/search.go). Most
 of the documentation and comments are verbatim copy from go code.
 """
-
-actor Main
-  let _env: Env
-
-  new create(env: Env) =>
-    _env = env
-    let f = StringFinder("CG")
-    let text = "CGCGTCGAATGGACTAGTACAGTACAGATCTGGACTCT"
-    let res = f.find(text)
-    env.out.write(res.string() + "\n")
-    for result in f.find_all(text) do
-      env.out.write(result.string() + "\n")
-    end
-
-
 primitive _LongestCommonSuffix
   fun apply(a: String box, b: String box): USize =>
     var idx: USize = 0
@@ -69,7 +54,7 @@ class val StringFinder
       env.out.write(f.find(text).string() + "\n") // prints 0
       env.out.write(f.find(text, 1).string() + "\n") // prints 2
       for result in f.find_all(text) do
-        env.out.write(result.string() + "\n") prints 0,2,5
+        env.out.write(result.string() + "\n") // prints 0,2,5
       end
   ```
 
