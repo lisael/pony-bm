@@ -33,17 +33,20 @@ primitive _LongestCommonSuffix
     idx
 
 
-class _StringFinderIterator is Iterator[ISize]
+class StringFinderIterator is Iterator[ISize]
   let _finder: StringFinder val
   let _text: String box
-  var _next: ISize = -1
+  var _next: ISize
+  let _shift: ISize
 
-  new create(text: String box, finder: StringFinder val) =>
+  new create(text: String box, finder: StringFinder val, shift: ISize) =>
     _finder = finder
     _text = text
+    _shift = shift
+    _next = -shift
 
   fun ref has_next(): Bool =>
-    _next = _finder.find(_text, (_next + 1).usize())
+    _next = _finder.find(_text, (_next + _shift).usize())
     if _next == -1 then false else true end
 
   fun next(): ISize => _next
@@ -171,5 +174,5 @@ class val StringFinder
     end 
     -1
 
-  fun val find_all(text: String): _StringFinderIterator =>
-    _StringFinderIterator(text, this)
+  fun val find_all(text: String, overlap: Bool=false): StringFinderIterator =>
+    StringFinderIterator(text, this, if overlap then 1 else (_size).isize()end)
