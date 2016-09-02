@@ -9,8 +9,35 @@ actor Main is TestList
     None
 
   fun tag tests(test: PonyTest) =>
+    test(_TestContains)
+    test(_TestCount)
     test(_TestFind)
     test(_TestFindAll)
+
+class iso _TestContains is UnitTest
+  let needle: String = "CG"
+  let haystack: String = "aCGtCGagtc"
+                        //0123456789
+
+  fun name():String => "Contains"
+
+  fun apply(h: TestHelper) =>
+    let f = StringFinder(needle)
+    h.assert_eq[Bool](f.contains(haystack), true)
+    /*h.assert_eq[USize](f.count("abcd"), 0)*/
+
+
+class iso _TestCount is UnitTest
+  let needle: String = "CG"
+  let haystack: String = "aCGtCGagtc"
+                        //0123456789
+
+  fun name():String => "Count"
+
+  fun apply(h: TestHelper) =>
+    let f = StringFinder(needle)
+    h.assert_eq[USize](f.count(haystack), 2)
+    h.assert_eq[USize](f.count("abcd"), 0)
 
 class iso _TestFind is UnitTest
   let needle: String = "CG"
